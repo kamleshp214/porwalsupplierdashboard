@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porwal Suppliers — Ledger Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0C1B33;
+  --navy2: #112240;
+  --gold: #F59E0B;
+  --gold-pale: rgba(245,158,11,0.12);
+  --gold-ring: rgba(245,158,11,0.3);
+  --bhada: #059669;
+  --bhada-lt: #ECFDF5;
+  --bhada-bd: #6EE7B7;
+  --reti: #DC2626;
+  --reti-lt: #FEF2F2;
+  --reti-bd: #FCA5A5;
+  --bg: #F0F4F8;
+  --card: #FFFFFF;
+  --text: #0F172A;
+  --muted: #64748B;
+  --border: #E2E8F0;
+  --radius: 14px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+  --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--navy);
+  padding: 22px 16px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: var(--gold-pale);
+  pointer-events: none;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.02);
+  pointer-events: none;
+}
+.header-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold-pale);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 99px;
+  margin-bottom: 12px;
+  border: 1px solid var(--gold-ring);
+}
+.header-badge svg { flex-shrink: 0; }
+.header-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+}
+.header-title span { color: var(--gold); }
+.header-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 7px;
+  letter-spacing: 0.2px;
+}
+.header-date-box {
+  text-align: right;
+  flex-shrink: 0;
+}
+.header-date-day {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+}
+.header-date-full {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+
+/* ── MAIN ── */
+.main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 18px 14px 32px;
+}
+
+/* ── SUMMARY CARDS ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 15px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.bhada-card::before { background: var(--bhada); }
+.stat-card.reti-card::before { background: var(--reti); }
+.stat-card.net-card::before { background: var(--gold); }
+.stat-card.net-card { grid-column: 1 / -1; }
+.stat-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 11px;
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+.stat-sub {
+  font-size: 11px;
+  margin-top: 5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.net-card .stat-value { font-size: 24px; }
+
+/* ── MONTH FILTER ── */
+.filter-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 7px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--sans);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow);
+}
+.tab-btn:hover { border-color: #94A3B8; color: var(--text); }
+.tab-btn.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* ── ADD FORM ── */
+.form-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.form-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.form-toggle.open { border-bottom-color: var(--border); }
+.form-toggle-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.form-toggle-title svg { color: var(--navy); }
+.form-chevron {
+  transition: transform 0.25s ease;
+  color: var(--muted);
+}
+.form-chevron.open { transform: rotate(180deg); }
+.form-body {
+  padding: 16px;
+  display: none;
+}
+.form-body.open { display: block; }
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.form-label svg { flex-shrink: 0; }
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--text);
+  background: #FAFBFC;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+.form-input:focus {
+  border-color: var(--navy);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(12,27,51,0.07);
+}
+.form-input.bhada-input { border-color: var(--bhada-bd); }
+.form-input.bhada-input:focus { border-color: var(--bhada); box-shadow: 0 0 0 3px rgba(5,150,105,0.08); }
+.form-input.reti-input { border-color: var(--reti-bd); }
+.form-input.reti-input:focus { border-color: var(--reti); box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
+input[type=number] { font-family: var(--mono); }
+.btn-add-entry {
+  width: 100%;
+  padding: 12px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-add-entry:hover { background: var(--navy2); }
+.btn-add-entry:active { transform: scale(0.99); }
+
+/* ── TABLE ── */
+.table-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.table-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.table-hdr-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-hdr-title svg { color: var(--muted); }
+.table-hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.entry-count {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+  background: var(--bg);
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}
+.search-box {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  width: 120px;
+  transition: border-color 0.15s, width 0.2s;
+}
+.search-box:focus { border-color: var(--navy); width: 150px; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; min-width: 460px; }
+thead th {
+  padding: 9px 12px;
+  text-align: right;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: #F8FAFC;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+thead th:first-child { text-align: left; padding-left: 16px; }
+thead th:last-child { cursor: default; width: 36px; }
+thead th:hover:not(:last-child) { color: var(--text); }
+thead th.sorted { color: var(--navy); }
+.sort-icon { margin-left: 3px; opacity: 0.4; font-style: normal; font-size: 11px; }
+thead th.sorted .sort-icon { opacity: 1; }
+tbody tr { border-bottom: 1px solid #F5F7FA; transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #F8FAFC; }
+tbody td {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: var(--mono);
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text);
+  vertical-align: middle;
+}
+tbody td:first-child {
+  text-align: left;
+  font-family: var(--sans);
+  padding-left: 16px;
+}
+tbody td:last-child { padding: 0 8px 0 0; }
+.td-date { display: flex; flex-direction: column; gap: 1px; }
+.td-date-main { font-size: 12px; font-weight: 600; color: var(--text); font-family: var(--mono); }
+.td-date-day { font-size: 10px; color: var(--muted); font-family: var(--sans); font-weight: 500; }
+.td-bhada { color: var(--bhada); font-weight: 500; }
+.td-reti { color: var(--reti); font-weight: 500; }
+.td-zero { color: #C8D5E3; }
+.pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+}
+.pill-pos { background: var(--bhada-lt); color: #065F46; }
+.pill-neg { background: var(--reti-lt); color: #991B1B; }
+.pill-zero { background: #F1F5F9; color: var(--muted); }
+.btn-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  color: #CBD5E1;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s, background 0.12s;
+  display: flex;
+  align-items: center;
+}
+tbody tr:hover .btn-del { opacity: 1; }
+.btn-del:hover { color: var(--reti); background: var(--reti-lt); }
+.month-row td {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 16px 6px;
+  background: #F8FAFC;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--sans);
+  text-align: left !important;
+}
+tfoot tr td {
+  padding: 11px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--mono);
+  background: #F4F7FB;
+  border-top: 2px solid var(--border);
+  text-align: right;
+}
+tfoot tr td:first-child {
+  font-family: var(--sans);
+  text-align: left;
+  padding-left: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.no-results {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 22px 16px 8px;
+  font-size: 11px;
+  color: #94A3B8;
+  letter-spacing: 0.3px;
+}
+.footer strong { color: #64748B; }
+
+/* ── RESPONSIVE ── */
+@media (min-width: 580px) {
+  .header { padding: 28px 22px 34px; }
+  .header-title { font-size: 34px; }
+  .main { padding: 20px 20px 40px; }
+  .cards-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .stat-card.net-card { grid-column: auto; }
+  .stat-value { font-size: 22px; }
+  .net-card .stat-value { font-size: 26px; }
+}
+@media (min-width: 780px) {
+  .header { padding: 30px 28px 36px; }
+  .main { padding: 22px 28px 48px; }
+  .stat-value { font-size: 24px; }
+  .net-card .stat-value { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div>
+        <div class="header-badge">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Daily Ledger
+        </div>
+        <h1 class="header-title">Porwal Suppliers<br><span>Ujjain</span></h1>
+        <p class="header-subtitle">
+          Bhada &amp; Reti Account &nbsp;·&nbsp; Abhay Bhaiya
+        </p>
+      </div>
+      <div class="header-date-box">
+        <div class="header-date-day" id="hdr-day"></div>
+        <div class="header-date-full" id="hdr-date"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- Summary Cards -->
+  <div class="cards-grid" id="cards-grid"><!-- JS --></div>
+
+  <!-- Month Filter -->
+  <div class="filter-row" id="filter-row"><!-- JS --></div>
+
+  <!-- Add Entry Form -->
+  <div class="form-card">
+    <div class="form-toggle open" id="form-toggle">
+      <div class="form-toggle-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Add New Entry
+      </div>
+      <svg class="form-chevron open" id="form-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="form-body open" id="form-body">
+      <div class="form-row-grid">
+        <div class="form-group full">
+          <label class="form-label" for="f-date">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Date
+          </label>
+          <input class="form-input" type="date" id="f-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-bhada" style="color:var(--bhada)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Bhada ₹
+          </label>
+          <input class="form-input bhada-input" type="number" id="f-bhada" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-reti" style="color:var(--reti)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 17l5-9 4 6 3-4 4 7H3z"/></svg>
+            Reti ₹
+          </label>
+          <input class="form-input reti-input" type="number" id="f-reti" placeholder="0" min="0">
+        </div>
+      </div>
+      <button class="btn-add-entry" id="btn-add">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Entry
+      </button>
+    </div>
+  </div>
+
+  <!-- Transaction History Table -->
+  <div class="table-card">
+    <div class="table-hdr">
+      <div class="table-hdr-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Transaction History
+      </div>
+      <div class="table-hdr-right">
+        <input class="search-box" type="text" id="search-box" placeholder="Search…" autocomplete="off">
+        <span class="entry-count" id="entry-count">— entries</span>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="date" class="sorted">Date <i class="sort-icon">↓</i></th>
+            <th data-col="bhada">Bhada <i class="sort-icon">↕</i></th>
+            <th data-col="reti">Reti <i class="sort-icon">↕</i></th>
+            <th data-col="net">Net <i class="sort-icon">↕</i></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot id="tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <strong>Porwal Suppliers, Ujjain</strong> &nbsp;·&nbsp; Abhay Bhaiya &nbsp;·&nbsp; <span id="fyear"></span>
+</footer>
+
+<script>
+/* ── DATA ── */
+const SEED = [
+  ["2026-02-01",51097,0],["2026-02-02",37800,7775],["2026-02-03",44554,31500],
+  ["2026-02-04",29055,44100],["2026-02-05",0,38325],["2026-02-06",6300,30450],
+  ["2026-02-07",23850,22050],["2026-02-08",20850,34650],["2026-02-09",32625,39900],
+  ["2026-02-10",54675,16800],["2026-02-11",31500,24650],["2026-02-12",57485,38850],
+  ["2026-02-13",52699,26250],["2026-02-14",30824,46200],["2026-02-15",62090,7875],
+  ["2026-02-16",80099,0],["2026-02-18",40724,8925],["2026-02-19",39997,44100],
+  ["2026-02-20",51412,7875],["2026-02-21",46800,30450],["2026-02-22",68774,0],
+  ["2026-02-23",63449,16750],["2026-02-24",46200,61425],["2026-02-25",57937,22050],
+  ["2026-02-26",45925,49350],["2026-02-27",33674,46200],["2026-02-28",53325,39900],
+  ["2026-03-01",51525,61950],["2026-03-02",47025,35700],["2026-03-05",6750,0],
+  ["2026-03-06",47765,32550],["2026-03-07",25875,44100],["2026-03-09",43675,43050],
+  ["2026-03-10",33165,33600],["2026-03-11",54450,13650],["2026-03-12",49613,15750],
+  ["2026-03-13",61198,0],["2026-03-14",62100,22050],["2026-03-15",56375,54075],
+  ["2026-03-16",59025,21525],["2026-03-17",63450,27300],["2026-03-19",66385,31500],
+  ["2026-03-20",47025,29400],["2026-03-21",51000,7875],["2026-03-22",35325,8925],
+  ["2026-03-23",44100,48825],["2026-03-24",41850,13650],["2026-03-25",46330,67725],
+  ["2026-03-26",3000,12600],["2026-03-27",23850,38850],["2026-03-28",35500,21500],
+  ["2026-03-29",45975,31500],["2026-03-30",62500,0],["2026-03-31",65158,0],
+  ["2026-04-01",58970,0],["2026-04-02",74861,30450],["2026-04-03",62879,0],
+  ["2026-04-04",49050,0],["2026-04-05",58387,36350],["2026-04-06",50175,13650],
+  ["2026-04-07",57375,7875],["2026-04-08",61875,13650],["2026-04-09",47470,7800],
+  ["2026-04-10",51780,74550],["2026-04-12",28550,33600],["2026-04-13",9450,14700],
+  ["2026-04-14",34775,119700],["2026-04-15",37799,0],["2026-04-16",37125,192675],
+  ["2026-04-18",24974,0],["2026-04-19",42825,0],["2026-04-20",43086,0],
+  ["2026-04-21",38136,0],["2026-04-22",44661,0],["2026-04-23",14400,0],
+  ["2026-04-24",6750,0],["2026-04-25",35886,0],["2026-04-26",32399,0],
+  ["2026-04-27",50949,0],["2026-04-28",6189,0],
+  ["2026-05-01",13500,0],["2026-05-02",11250,0],["2026-05-03",18000,0],
+  ["2026-05-04",34199,0],["2026-05-05",6750,0],["2026-05-06",24662,0],
+  ["2026-05-07",43650,0],["2026-05-08",38924,0],["2026-05-09",34199,0],
+  ["2026-05-10",18112,0],["2026-05-11",22950,0],["2026-05-12",7875,0],
+  ["2026-05-12",26887,0],["2026-05-14",25200,0],["2026-05-15",40611,0]
+];
+
+const DAYS  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DSHRT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MSHRT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let entries  = SEED.map(([d,b,r],i) => ({id:i, date:d, bhada:b, reti:r}));
+let nextId   = SEED.length;
+let sortCol  = 'date';
+let sortDir  = 'desc';
+let filterMo = 'all';
+let searchQ  = '';
+
+/* ── HELPERS ── */
+function inr(n){
+  if(n===0) return '—';
+  return '₹'+Math.abs(n).toLocaleString('en-IN');
+}
+function inrFull(n){
+  return '₹'+Math.abs(n).toLocaleString('en-IN');
+}
+function fmtDate(iso){
+  const d=new Date(iso+'T00:00:00');
+  return d.getDate()+' '+MSHRT[d.getMonth()]+' \''+String(d.getFullYear()).slice(2);
+}
+function fmtDow(iso){
+  return DSHRT[new Date(iso+'T00:00:00').getDay()];
+}
+function monthKey(iso){ return iso.slice(0,7); }
+function monthLabel(mk){
+  const d=new Date(mk+'-01');
+  return MONS[d.getMonth()]+' '+d.getFullYear();
+}
+function getFiltered(){
+  let list = filterMo==='all' ? entries : entries.filter(e=>e.date.startsWith(filterMo));
+  if(searchQ){
+    const q=searchQ.toLowerCase();
+    list=list.filter(e=>e.date.includes(q)||fmtDate(e.date).toLowerCase().includes(q)||DAYS[new Date(e.date+'T00:00:00').getDay()].toLowerCase().includes(q));
+  }
+  return list;
+}
+function getSorted(list){
+  return [...list].sort((a,b)=>{
+    let c=0;
+    if(sortCol==='date') c=a.date.localeCompare(b.date);
+    else if(sortCol==='bhada') c=a.bhada-b.bhada;
+    else if(sortCol==='reti') c=a.reti-b.reti;
+    else if(sortCol==='net') c=(a.bhada-a.reti)-(b.bhada-b.reti);
+    return sortDir==='asc'?c:-c;
+  });
+}
+function totals(list){
+  return list.reduce((acc,e)=>({b:acc.b+e.bhada,r:acc.r+e.reti}),{b:0,r:0});
+}
+
+/* ── RENDER CARDS ── */
+function renderCards(){
+  const t = totals(getFiltered());
+  const net = t.b - t.r;
+  const pos = net >= 0;
+  const absNet = Math.abs(net);
+
+  document.getElementById('cards-grid').innerHTML = `
+    <div class="stat-card bhada-card">
+      <div class="stat-icon" style="background:var(--bhada-lt)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bhada)" stroke-width="2">
+          <rect x="1" y="3" width="15" height="13" rx="1"/>
+          <path d="M16 8h4l3 4v4h-7V8z"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+      </div>
+      <div class="stat-label">Total Bhada</div>
+      <div class="stat-value" style="color:var(--bhada)">${inrFull(t.b)}</div>
+      <div class="stat-sub" style="color:#34D399">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Freight receivable
+      </div>
+    </div>
+
+    <div class="stat-card reti-card">
+      <div class="stat-icon" style="background:var(--reti-lt)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--reti)" stroke-width="2">
+          <path d="M3 17l5-9 4 6 3-4 4 7H3z"/>
+        </svg>
+      </div>
+      <div class="stat-label">Total Reti</div>
+      <div class="stat-value" style="color:var(--reti)">${inrFull(t.r)}</div>
+      <div class="stat-sub" style="color:#F87171">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        Sand payable
+      </div>
+    </div>
+
+    <div class="stat-card net-card">
+      <div class="stat-icon" style="background:${pos?'#D1FAE5':'#FEE2E2'}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${pos?'#059669':'#DC2626'}" stroke-width="2">
+          <path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h4v-4z"/>
+        </svg>
+      </div>
+      <div class="stat-label">Net Balance</div>
+      <div class="stat-value" style="color:${pos?'#059669':'#DC2626'}">${inrFull(absNet)}</div>
+      <div class="stat-sub" style="color:${pos?'#059669':'#DC2626'}; font-weight:700">
+        ${pos
+          ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Client owes you'
+          : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> You owe Client'
+        }
+      </div>
+    </div>
+  `;
+}
+
+/* ── RENDER TABS ── */
+function renderTabs(){
+  const months = [...new Set(entries.map(e=>monthKey(e.date)))].sort();
+  let html = `<button class="tab-btn${filterMo==='all'?' active':''}" data-m="all">All Time</button>`;
+  months.forEach(mk=>{
+    html += `<button class="tab-btn${filterMo===mk?' active':''}" data-m="${mk}">${monthLabel(mk)}</button>`;
+  });
+  const row = document.getElementById('filter-row');
+  row.innerHTML = html;
+  row.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      filterMo = btn.dataset.m;
+      render();
+    });
+  });
+}
+
+/* ── RENDER TABLE ── */
+function renderTable(){
+  const filtered = getFiltered();
+  const sorted   = getSorted(filtered);
+  const tot      = totals(filtered);
+  const net      = tot.b - tot.r;
+  const isPos    = net >= 0;
+
+  document.getElementById('entry-count').textContent = filtered.length + ' entries';
+
+  /* update sort icons */
+  document.querySelectorAll('thead th[data-col]').forEach(th=>{
+    const col = th.dataset.col;
+    const icon = th.querySelector('.sort-icon');
+    if(col===sortCol){ th.classList.add('sorted'); icon.textContent = sortDir==='asc'?'↑':'↓'; }
+    else { th.classList.remove('sorted'); icon.textContent = '↕'; }
+  });
+
+  if(sorted.length===0){
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="5" class="no-results">No entries found.</td></tr>`;
+    document.getElementById('tfoot').innerHTML = '';
+    return;
+  }
+
+  let rows = '';
+  let lastMk = '';
+  const groupByDate = sortCol==='date';
+
+  sorted.forEach(e=>{
+    const mk = monthKey(e.date);
+    if(groupByDate && filterMo==='all' && mk!==lastMk){
+      rows += `<tr class="month-row"><td colspan="5">${monthLabel(mk)}</td></tr>`;
+      lastMk = mk;
+    }
+    const dayNet = e.bhada - e.reti;
+    const pillCls = dayNet>0?'pill-pos':dayNet<0?'pill-neg':'pill-zero';
+    const pillTxt = dayNet===0?'₹0':(dayNet>0?'+':'-')+'₹'+Math.abs(dayNet).toLocaleString('en-IN');
+
+    rows += `<tr>
+      <td>
+        <div class="td-date">
+          <span class="td-date-main">${fmtDate(e.date)}</span>
+          <span class="td-date-day">${fmtDow(e.date)}</span>
+        </div>
+      </td>
+      <td class="${e.bhada>0?'td-bhada':'td-zero'}">${inr(e.bhada)}</td>
+      <td class="${e.reti>0?'td-reti':'td-zero'}">${inr(e.reti)}</td>
+      <td><span class="pill ${pillCls}">${pillTxt}</span></td>
+      <td>
+        <button class="btn-del" data-id="${e.id}" title="Delete entry" aria-label="Delete entry">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById('tbody').innerHTML = rows;
+
+  /* tfoot totals */
+  const tNet = tot.b - tot.r;
+  const tPos = tNet >= 0;
+  const tPill = tNet===0?'pill-zero':tPos?'pill-pos':'pill-neg';
+  const tTxt  = tNet===0?'₹0':(tPos?'+':'-')+'₹'+Math.abs(tNet).toLocaleString('en-IN');
+  document.getElementById('tfoot').innerHTML = `
+    <tr>
+      <td>Totals (${filtered.length})</td>
+      <td style="color:var(--bhada)">₹${tot.b.toLocaleString('en-IN')}</td>
+      <td style="color:var(--reti)">₹${tot.r.toLocaleString('en-IN')}</td>
+      <td><span class="pill ${tPill}">${tTxt}</span></td>
+      <td></td>
+    </tr>`;
+
+  /* delete handlers */
+  document.querySelectorAll('.btn-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(!confirm('Delete this entry?')) return;
+      entries = entries.filter(e=>e.id!==parseInt(btn.dataset.id));
+      render();
+    });
+  });
+}
+
+/* ── FULL RENDER ── */
+function render(){
+  renderCards();
+  renderTabs();
+  renderTable();
+}
+
+/* ── SORT HEADERS ── */
+document.querySelectorAll('thead th[data-col]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const col = th.dataset.col;
+    if(sortCol===col) sortDir = sortDir==='asc'?'desc':'asc';
+    else { sortCol=col; sortDir='desc'; }
+    render();
+  });
+});
+
+/* ── SEARCH ── */
+document.getElementById('search-box').addEventListener('input', e=>{
+  searchQ = e.target.value.trim();
+  render();
+});
+
+/* ── FORM TOGGLE ── */
+document.getElementById('form-toggle').addEventListener('click', ()=>{
+  const body    = document.getElementById('form-body');
+  const chevron = document.getElementById('form-chevron');
+  const toggle  = document.getElementById('form-toggle');
+  const open    = body.classList.toggle('open');
+  chevron.classList.toggle('open', open);
+  toggle.classList.toggle('open', open);
+});
+
+/* ── ADD ENTRY ── */
+document.getElementById('btn-add').addEventListener('click', ()=>{
+  const dateEl  = document.getElementById('f-date');
+  const bhadaEl = document.getElementById('f-bhada');
+  const retiEl  = document.getElementById('f-reti');
+  const date    = dateEl.value;
+  if(!date){ dateEl.focus(); return; }
+  const bhada = parseFloat(bhadaEl.value)||0;
+  const reti  = parseFloat(retiEl.value)||0;
+  entries.push({id:nextId++, date, bhada, reti});
+  bhadaEl.value = '';
+  retiEl.value  = '';
+  filterMo = 'all';
+  sortCol  = 'date';
+  sortDir  = 'desc';
+  render();
+});
+
+/* ── INIT ── */
+(function init(){
+  const now = new Date();
+  const dayName = DAYS[now.getDay()];
+  const dateStr = now.getDate()+' '+MSHRT[now.getMonth()]+' '+now.getFullYear();
+  document.getElementById('hdr-day').textContent  = dayName;
+  document.getElementById('hdr-date').textContent = dateStr;
+  document.getElementById('fyear').textContent    = now.getFullYear();
+  document.getElementById('f-date').value = now.toISOString().split('T')[0];
+  render();
+})();
+</script>
+</body>
+</html>
