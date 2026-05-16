@@ -514,7 +514,6 @@ tfoot tr td:first-child {
 </head>
 <body>
 
-<!-- ══ HEADER ══ -->
 <header class="header">
   <div class="header-inner">
     <div class="header-top">
@@ -536,16 +535,12 @@ tfoot tr td:first-child {
   </div>
 </header>
 
-<!-- ══ MAIN ══ -->
 <main class="main">
 
-  <!-- Summary Cards -->
-  <div class="cards-grid" id="cards-grid"><!-- JS --></div>
+  <div class="cards-grid" id="cards-grid"></div>
 
-  <!-- Month Filter -->
-  <div class="filter-row" id="filter-row"><!-- JS --></div>
+  <div class="filter-row" id="filter-row"></div>
 
-  <!-- Add Entry Form -->
   <div class="form-card">
     <div class="form-toggle open" id="form-toggle">
       <div class="form-toggle-title">
@@ -585,7 +580,6 @@ tfoot tr td:first-child {
     </div>
   </div>
 
-  <!-- Transaction History Table -->
   <div class="table-card">
     <div class="table-hdr">
       <div class="table-hdr-title">
@@ -616,7 +610,6 @@ tfoot tr td:first-child {
 
 </main>
 
-<!-- ══ FOOTER ══ -->
 <footer class="footer">
   <strong>Porwal Suppliers, Ujjain</strong> &nbsp;·&nbsp; Abhay Bhaiya &nbsp;·&nbsp; <span id="fyear"></span>
 </footer>
@@ -663,8 +656,33 @@ const DSHRT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MSHRT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-let entries  = SEED.map(([d,b,r],i) => ({id:i, date:d, bhada:b, reti:r}));
-let nextId   = SEED.length;
+/* ── STATE & LOCAL STORAGE ── */
+let entries = [];
+let nextId = 0;
+
+// Function to load data from localStorage or use SEED data if nothing exists
+function loadData() {
+  const savedData = localStorage.getItem('porwal_ledger_data');
+  if (savedData) {
+    const parsed = JSON.parse(savedData);
+    entries = parsed.entries;
+    nextId = parsed.nextId;
+  } else {
+    // First time load: use SEED data
+    entries = SEED.map(([d,b,r],i) => ({id:i, date:d, bhada:b, reti:r}));
+    nextId = SEED.length;
+    saveData(); // Save immediately so it's there next time
+  }
+}
+
+// Function to save current state to localStorage
+function saveData() {
+  localStorage.setItem('porwal_ledger_data', JSON.stringify({ entries, nextId }));
+}
+
+// Initialize state
+loadData();
+
 let sortCol  = 'date';
 let sortDir  = 'desc';
 let filterMo = 'all';
@@ -861,11 +879,12 @@ function renderTable(){
       <td></td>
     </tr>`;
 
-  /* delete handlers */
+  /* delete handlers - Updated to save data */
   document.querySelectorAll('.btn-del').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       if(!confirm('Delete this entry?')) return;
       entries = entries.filter(e=>e.id!==parseInt(btn.dataset.id));
+      saveData(); // Save changes to localStorage
       render();
     });
   });
@@ -904,7 +923,7 @@ document.getElementById('form-toggle').addEventListener('click', ()=>{
   toggle.classList.toggle('open', open);
 });
 
-/* ── ADD ENTRY ── */
+/* ── ADD ENTRY ── Updated to save data */
 document.getElementById('btn-add').addEventListener('click', ()=>{
   const dateEl  = document.getElementById('f-date');
   const bhadaEl = document.getElementById('f-bhada');
@@ -913,12 +932,20 @@ document.getElementById('btn-add').addEventListener('click', ()=>{
   if(!date){ dateEl.focus(); return; }
   const bhada = parseFloat(bhadaEl.value)||0;
   const reti  = parseFloat(retiEl.value)||0;
+  
+  // Add new entry
   entries.push({id:nextId++, date, bhada, reti});
+  
+  // Save to localStorage
+  saveData();
+
+  // Reset form
   bhadaEl.value = '';
   retiEl.value  = '';
   filterMo = 'all';
   sortCol  = 'date';
   sortDir  = 'desc';
+  
   render();
 });
 
